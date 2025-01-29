@@ -11,6 +11,10 @@ Levanta los microservicios con docker compose
 2. Crear un archivo `.env` basado en el archivo `.env.template`
 3. Ejecutar el comando:
 ```bash
+git submodule update --init --recursive
+```
+4. Ejecutar el comando:
+```bash
 $ docker compose up --build
 ```
 
