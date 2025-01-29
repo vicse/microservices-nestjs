@@ -1,3 +1,6 @@
 [submodule "ms-gateway"]
 	path = ms-gateway
 	url = https://github.com/vicse/ms-gateway-nestjs.git
+[submodule "ms-products"]
+	path = ms-products
+	url = https://github.com/vicse/ms-products-nestjs.git
