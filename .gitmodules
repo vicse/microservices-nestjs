@@ -7,3 +7,6 @@
 [submodule "ms-orders"]
 	path = ms-orders
 	url = https://github.com/vicse/ms-orders-nestjs.git
+[submodule "ms-payments"]
+	path = ms-payments
+	url = https://github.com/vicse/ms-payments-nestjs.git
