@@ -15,55 +15,88 @@ services:
       - PORT=3000
       - NATS_SERVERS=nats://nats-server:4222
 
-  ms-products:
-    build: ./ms-products
-    ports:
-      - "3001:3001"
-    volumes:
-      - ./ms-products/src:/usr/src/app/src
-    command: npm run start:dev
-    environment:
-      - PORT=3001
-      - NATS_SERVERS=nats://nats-server:4222
-      - DATABASE_URL=file:./dev.db
+#  ms-products:
+#    build: ./ms-products
+#    ports:
+#      - "3001:3001"
+#    volumes:
+#      - ./ms-products/src:/usr/src/app/src
+#    command: npm run start:dev
+#    environment:
+#      - PORT=3001
+#      - NATS_SERVERS=nats://nats-server:4222
+#      - DATABASE_URL=file:./dev.db
+#
+#  ms-orders:
+#    build: ./ms-orders
+#    ports:
+#      - "3002:3002"
+#    volumes:
+#      - ./ms-orders/src:/usr/src/app/src
+#    command: npm run start:dev
+#    depends_on:
+#      - orders-db
+#    environment:
+#      - PORT=3002
+#      - DATABASE_URL=postgresql://postgres:123456@orders-db:5432/ordersDB?schema=public
+#      - NATS_SERVERS=nats://nats-server:4222
+#
+#  orders-db:
+#    image: postgres:16.2
+#    restart: always
+#    volumes:
+#      - ./ms-orders/postgres:/var/lib/postgresql/data
+#    ports:
+#      - "5432:5432"
+#    environment:
+#      - POSTGRES_USER=postgres
+#      - POSTGRES_PASSWORD=123456
+#      - POSTGRES_DB=ordersDB
+#
+#  ms-payments:
+#    build: ./ms-payments
+#    ports:
+#      - ${MS_PAYMENTS_PORT}:3003
+#    volumes:
+#      - ./ms-payments/src:/usr/src/app/src
+#    command: npm run start:dev
+#    environment:
+#      - PORT=${MS_PAYMENTS_PORT}
+#      - NATS_SERVERS=${NATS_SERVERS}
+#      - STRIPE_SECRET=${STRIPE_SECRET}
+#      - STRIPE_SUCCESS_URL=${STRIPE_SUCCESS_URL}
+#      - STRIPE_CANCEL_URL=${STRIPE_CANCEL_URL}
+#      - STRIPE_ENDPOINT_SECRET=${STRIPE_ENDPOINT_SECRET}
 
-  ms-orders:
-    build: ./ms-orders
+  ms-auth:
+    build: ./ms-auth
     ports:
-      - "3002:3002"
+      - ${MS_AUTH_PORT}:${MS_AUTH_PORT}
     volumes:
-      - ./ms-orders/src:/usr/src/app/src
+      - ./ms-auth/src:/usr/src/app/src
     command: npm run start:dev
     depends_on:
-      - orders-db
+      - mongo-db
     environment:
-      - PORT=3002
-      - DATABASE_URL=postgresql://postgres:123456@orders-db:5432/ordersDB?schema=public
-      - NATS_SERVERS=nats://nats-server:4222
-
-  orders-db:
-    image: postgres:16.2
-    restart: always
-    volumes:
-      - ./ms-orders/postgres:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=123456
-      - POSTGRES_DB=ordersDB
-
-  ms-payments:
-    build: ./ms-payments
-    ports:
-      - ${MS_PAYMENTS_PORT}:3003
-    volumes:
-      - ./ms-payments/src:/usr/src/app/src
-    command: npm run start:dev
-    environment:
-      - PORT=${MS_PAYMENTS_PORT}
+      - PORT=${MS_AUTH_PORT}
       - NATS_SERVERS=${NATS_SERVERS}
-      - STRIPE_SECRET=${STRIPE_SECRET}
-      - STRIPE_SUCCESS_URL=${STRIPE_SUCCESS_URL}
-      - STRIPE_CANCEL_URL=${STRIPE_CANCEL_URL}
-      - STRIPE_ENDPOINT_SECRET=${STRIPE_ENDPOINT_SECRET}
+      - DATABASE_URL=${AUTH_DATABASE_URL}
+      - JWT_SECRET=${JWT_SECRET}
+
+  mongo-db:
+    build: ms-auth/mongodb-replica
+    environment:
+      - MONGO_REPLICA_HOST=localhost
+      - MONGO_REPLICA_PORT=27017
+      - MONGO_INITDB_ROOT_USERNAME=mongo
+      - MONGO_INITDB_ROOT_PASSWORD=example
+    ports:
+      - '27017:27017'
+    volumes:
+      - ./ms-auth/mongo_data:/data/db
+    restart: unless-stopped
+    healthcheck:
+      test: [ 'CMD', 'mongo', 'admin', '--port', '27017', '--eval', "db.adminCommand('ping').ok" ]
+      interval: 5s
+      timeout: 2s
+      retries: 20
