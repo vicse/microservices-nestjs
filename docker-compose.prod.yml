@@ -1,0 +1,60 @@
+services:
+  nats-server:
+    image: nats:latest
+
+  ms-gateway:
+    build:
+      context: ./ms-gateway
+      dockerfile: Dockerfile.prod
+    image: ms-gateway-prod
+    ports:
+      - ${MS_GATEWAY_PORT}:${MS_GATEWAY_PORT}
+    environment:
+      - PORT=${MS_GATEWAY_PORT}
+      - NATS_SERVERS=${NATS_SERVERS}
+
+  ms-auth:
+    build:
+      context: ./ms-auth
+      dockerfile: Dockerfile.prod
+    image: ms-auth-prod
+    environment:
+      - PORT=${MS_AUTH_PORT}
+      - NATS_SERVERS=${NATS_SERVERS}
+      - DATABASE_URL=${AUTH_DATABASE_URL}
+      - JWT_SECRET=${JWT_SECRET}
+
+  ms-products:
+    build:
+      context: ./ms-products
+      dockerfile: Dockerfile.prod
+    image: ms-products-prod
+    environment:
+      - PORT=${MS_PRODUCTS_PORT}
+      - NATS_SERVERS=${NATS_SERVERS}
+      - DATABASE_URL=${PRODUCTS_DATABASE_URL}
+
+  ms-payments:
+    build:
+      context: ./ms-payments
+      dockerfile: Dockerfile.prod
+    image: ms-payments-prod
+    environment:
+      - PORT=${MS_PAYMENTS_PORT}
+      - NATS_SERVERS=${NATS_SERVERS}
+      - STRIPE_SECRET=${STRIPE_SECRET}
+      - STRIPE_SUCCESS_URL=${STRIPE_SUCCESS_URL}
+      - STRIPE_CANCEL_URL=${STRIPE_CANCEL_URL}
+      - STRIPE_ENDPOINT_SECRET=${STRIPE_ENDPOINT_SECRET}
+
+  ms-orders:
+    build:
+      context: ./ms-orders
+      dockerfile: Dockerfile.prod
+      args:
+        - ORDERS_DATABASE_URL=${ORDERS_DATABASE_URL}
+    image: ms-orders-prod
+    environment:
+      - PORT=${MS_ORDERS_PORT}
+      - DATABASE_URL=${ORDERS_DATABASE_URL}
+      - NATS_SERVERS=${NATS_SERVERS}
