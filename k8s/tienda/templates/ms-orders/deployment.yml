@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: ms-orders
+  name: ms-orders
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ms-orders
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: ms-orders
+    spec:
+      containers:
+      - image: 590183920340.dkr.ecr.us-east-1.amazonaws.com/tienda-microservices/image-registry:ms-orders
+        name: image-registry
+        env:
+          - name: PORT
+            value: "3000"
+          - name: NATS_SERVERS
+            value: "nats://nats"
+          - name: DATABASE_URL
+            valueFrom:
+              secretKeyRef:
+                name: orders-secrets
+                key: database_url
+        resources: {}
+status: {}

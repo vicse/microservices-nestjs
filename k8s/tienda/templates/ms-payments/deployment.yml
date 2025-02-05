@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: ms-payments
+  name: ms-payments
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ms-payments
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: ms-payments
+    spec:
+      containers:
+      - image: 590183920340.dkr.ecr.us-east-1.amazonaws.com/tienda-microservices/image-registry:ms-payments
+        name: image-registry
+        env:
+          - name: PORT
+            value: "3000"
+          - name: NATS_SERVERS
+            value: "nats://nats"
+          - name: STRIPE_SUCCESS_URL
+            value: "http://localhost:3003/payments/success"
+          - name: STRIPE_CANCEL_URL
+            value: "http://localhost:3003/payments/cancel"
+          - name: STRIPE_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: payments-secrets
+                key: stripe_secret
+          - name: STRIPE_ENDPOINT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: payments-secrets
+                key: stripe_endpoint_secret
+        resources: {}
+status: {}

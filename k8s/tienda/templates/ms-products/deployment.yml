@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: ms-products
+  name: ms-products
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ms-products
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: ms-products
+    spec:
+      containers:
+      - image: 590183920340.dkr.ecr.us-east-1.amazonaws.com/tienda-microservices/image-registry:ms-products
+        name: image-registry
+        env:
+          - name: PORT
+            value: "3000"
+          - name: NATS_SERVERS
+            value: "nats://nats"
+          - name: DATABASE_URL
+            value: "file:./dev.db"
+        resources: {}
+status: {}
